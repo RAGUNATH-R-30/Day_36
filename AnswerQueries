@@ -1,0 +1,27 @@
+//1.Find all the topics and tasks which are taught in the month of October
+db.topics.find({ month: "October" })
+db.tasks.find({ topic_id: { $in: db.topics.find({ month: "October" }).toArray().map(topic => topic._id) } })
+
+
+//2. Find all the company drives which appeared between 15 oct-2020 and 31-oct-2020
+db.company_drives.find({ date: { $gte: ISODate("2020-10-15"), $lte: ISODate("2020-10-31") } })
+
+//3. Find all the company drives and students who are appeared for the placement.
+db.company_drives.find({ "students_attended": { $exists: true, $not: { $size: 0 } } })
+  
+//4.Find the number of problems solved by the user in codekata
+db.codekata.aggregate([
+    { $match: { user_id: 1 } },
+    { $project: { solved_problems_count: { $size: "$solved_problems" } } }
+  ])
+  
+//5.Find all the mentors with who has the mentee's count more than 15
+db.mentors.find({ mentee_count: { $gt: 15 } })
+
+//6.Find the number of users who are absent and task is not submitted  between 15 oct-2020 and 31-oct-2020
+db.attendance.find({
+    date: { $gte: ISODate("2020-10-15"), $lte: ISODate("2020-10-31") },
+    status: "absent",
+    user_id: { $nin: db.codekata.find({}).toArray().map(codekata => codekata.user_id) }
+  }).count()
+  
